@@ -1,0 +1,330 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "date_date"
+            },
+            {
+              "name": "client_name"
+            },
+            {
+              "name": "ddmmyyyy"
+            },
+            {
+              "name": "contact_number"
+            },
+            {
+              "name": "product_name"
+            },
+            {
+              "name": "fabric_and_product_details"
+            },
+            {
+              "name": "printing_details"
+            },
+            {
+              "name": "unit_price",
+              "type": "number"
+            },
+            {
+              "name": "qty",
+              "type": "number"
+            },
+            {
+              "name": "contact_number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7abd8061-f911-4939-9395-7dade1c0d68c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8ec037f4-cab0-4060-94a8-ff80f4daac6c",
+              "name": "qty",
+              "value": "={{ $json.qty }}",
+              "type": "string"
+            },
+            {
+              "id": "c2610bd5-49d9-4e34-9670-398a5fc3038b",
+              "name": "total_amount",
+              "value": "={{ $json.unit_price*$json.qty }}",
+              "type": "string"
+            },
+            {
+              "id": "085f7868-8335-49a3-8f3c-4c61d76d1a42",
+              "name": "unit_price",
+              "value": "={{ $json.unit_price }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        80
+      ],
+      "id": "f4c76d5f-ea58-4c2e-8bfb-4707c7f033b9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "includeTime": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -96
+      ],
+      "id": "d8b87e78-4236-4de5-a9c2-2c475dcb5930",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "outputFieldName": "date_date",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -96
+      ],
+      "id": "fd150ea3-2baf-4158-92c3-c605ccd5f47a",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "b54349bc-b88f-4bde-83ec-f55263e05bd5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "12do1iAdGbD0GJlw1nVrNrrAucNK2t0fDIzrJj9AOeAo",
+          "mode": "list",
+          "cachedResultName": "Quotation-demo",
+          "cachedResultUrl": "https://docs.google.com/document/d/YOUR_DOC_ID"
+        },
+        "name": "={{ $json.contact_number }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1YgJonVAFTWOcwoaSl0b5GeCiKV1o1lka",
+          "mode": "list",
+          "cachedResultName": "Quote",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        864,
+        0
+      ],
+      "id": "d234838e-5329-45bb-b440-dd802507b79e",
+      "name": "Copy file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vKH6Ey45sypVhwHx",
+          "name": "Auto Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "date_date",
+              "replaceText": "={{ $('Merge').item.json.date_date }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "client_name",
+              "replaceText": "={{ $('Merge').item.json.client_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "ddmmyyyy",
+              "replaceText": "={{ $('Merge').item.json.ddmmyyyy }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "contact_number",
+              "replaceText": "={{ $('Merge').item.json.contact_number }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "product_name",
+              "replaceText": "={{ $('Merge').item.json.product_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "fabric_and_product_details",
+              "replaceText": "={{ $('Merge').item.json.fabric_and_product_details }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "printing_details",
+              "replaceText": "={{ $('Merge').item.json.printing_details }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "unit_price",
+              "replaceText": "={{ $('Merge').item.json.unit_price }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "qty",
+              "replaceText": "={{ $('Merge').item.json.qty }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "total_amount",
+              "replaceText": "={{ $('Merge').item.json.total_amount }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "17236d85-4a5b-4157-8348-cfbdbefb4852",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "YOUR_DOC_ID",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92b121e59a021c348b02da25ddf213c3b4a8310df12651d21b7e00b9a4295c52"
+  }
+}
