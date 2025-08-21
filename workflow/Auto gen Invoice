@@ -1,0 +1,254 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"phone_number\": \"SAMPLE_PHONE\",\n  \"product_name\": \"T-shirt\",\n  \"fabric_and_product_details\": \"26s 180g 平紋布 (柔軟)白色基本款\",\n  \"printing_details\": \"正面背面刺繡寬30cm\",\n  \"unit_price\": 48.5,\n  \"qty\": 100,\n  \"deposit_payment\": 4000,\n  \"client_name\": \"SAMPLE_CLIENT\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-608, 48],
+      "id": "0e9fa29a-4dba-4cd2-b0f2-10680e356986",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DOC_ID",
+          "mode": "list",
+          "cachedResultName": "n8n Invoice",
+          "cachedResultUrl": "https://docs.google.com/document/d/YOUR_GOOGLE_DOC_ID/edit"
+        },
+        "name": "={{ $json.phone_number }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "n8n auto invoice",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [688, 32],
+      "id": "93aea2ee-3764-4550-8347-b4dfe61e5669",
+      "name": "copy quotation1"
+
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [464, 32],
+      "id": "a4104195-a2c8-4eab-9ebc-140e78523e31",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [80, -320],
+      "id": "e4ece5e3-a0bc-4489-abce-d698c0e34ce4",
+      "name": "Merge2",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "ddMMyyyy",
+        "outputFieldName": "ddmmyyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-160, -176],
+      "id": "97060dab-351d-4800-9c35-4b549e9e25c3",
+      "name": "Date & Time5"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "outputFieldName": "date_date",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-160, -400],
+      "id": "c903c512-5d28-4569-af7d-4db329d17bbf",
+      "name": "Date & Time4"
+    },
+    {
+      "parameters": {
+        "includeTime": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-400, -320],
+      "id": "9094c6ec-009d-4b55-9b22-7f87b44e05cd",
+      "name": "Date & Time3"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('copy quotation1').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1104, 32],
+      "id": "f83fef2b-4478-4825-9c6d-caf6a2711b11",
+      "name": "Download invoice"
+
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a2b72ba-e0c3-439a-bcb4-6464b4193657",
+              "name": "balance_payment",
+              "value": "={{ $json.total_amount-$json.deposit_payment }}",
+              "type": "string"
+            },
+            {
+              "id": "3db600fc-4a6d-4888-8691-422dc0d49c45",
+              "name": "deposit_payment",
+              "value": "={{ $json.deposit_payment }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [80, 48],
+      "id": "bfd08e0a-abdf-4b9d-8a43-d86e14fd0959",
+      "name": "get balance"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2eb07186-b03c-4a80-afd0-93ad86f38683",
+              "name": "unit_price",
+              "value": "={{ $json.unit_price }}",
+              "type": "string"
+            },
+            {
+              "id": "a1d591c8-d24d-4070-b64f-22fd1dbb10de",
+              "name": "qty",
+              "value": "={{ $json.qty }}",
+              "type": "string"
+            },
+            {
+              "id": "5598162e-c37b-47a3-aaee-91ae911939af",
+              "name": "total_amount",
+              "value": "={{ $json.qty*$json.unit_price }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-288, 48],
+      "id": "03ec91d8-cd8a-4b2a-9a48-c0dc65d63cb2",
+      "name": "convert data"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            { "action": "replaceAll", "text": "date_date", "replaceText": "={{ $('Merge3').item.json.date_date }}" },
+            { "action": "replaceAll", "text": "client_name", "replaceText": "={{ $('Merge3').item.json.client_name }}" },
+            { "action": "replaceAll", "text": "ddmmyyyy", "replaceText": "={{ $('Merge3').item.json.ddmmyyyy }}" },
+            { "action": "replaceAll", "text": "contact_number", "replaceText": "={{ $('Merge3').item.json.phone_number }}" },
+            { "action": "replaceAll", "text": "product_name", "replaceText": "={{ $('Merge3').item.json.product_name }}" },
+            { "action": "replaceAll", "text": "printing_details", "replaceText": "={{ $('Merge3').item.json.printing_details }}" },
+            { "action": "replaceAll", "text": "unit_price", "replaceText": "={{ $('Merge3').item.json.unit_price }}" },
+            { "action": "replaceAll", "text": "qty", "replaceText": "={{ $('Merge3').item.json.qty }}" },
+            { "action": "replaceAll", "text": "total_amount", "replaceText": "={{ $('Merge3').item.json.total_amount }}" },
+            { "action": "replaceAll", "text": "fabric_and_product_details", "replaceText": "={{ $('Merge3').item.json.fabric_and_product_details }}" },
+            { "action": "replaceAll", "text": "deposit_payment", "replaceText": "={{ $('Merge3').item.json.deposit_payment }}" },
+            { "action": "replaceAll", "text": "balance_payment", "replaceText": "={{ $('Merge3').item.json.balance_payment }}" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [880, 32],
+      "id": "128a7c12-7d97-45e0-9124-3eb2e0464f3d",
+      "name": "Update a document"
+  
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [[{ "node": "Date & Time3", "type": "main", "index": 0 }, { "node": "convert data", "type": "main", "index": 0 }]]
+    },
+    "copy quotation1": { "main": [[{ "node": "Update a document", "type": "main", "index": 0 }]] },
+    "Merge3": { "main": [[{ "node": "copy quotation1", "type": "main", "index": 0 }]] },
+    "Merge2": { "main": [[{ "node": "Merge3", "type": "main", "index": 0 }]] },
+    "Date & Time5": { "main": [[{ "node": "Merge2", "type": "main", "index": 1 }]] },
+    "Date & Time4": { "main": [[{ "node": "Merge2", "type": "main", "index": 0 }]] },
+    "Date & Time3": { "main": [[{ "node": "Date & Time4", "type": "main", "index": 0 }, { "node": "Date & Time5", "type": "main", "index": 0 }]] },
+    "Download invoice": { "main": [[]] },
+    "get balance": { "main": [[{ "node": "Merge3", "type": "main", "index": 1 }]] },
+    "convert data": { "main": [[{ "node": "get balance", "type": "main", "index": 0 }]] },
+    "Update a document": { "main": [[{ "node": "Download invoice", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "phone_number": "SAMPLE_PHONE",
+        "product_name": "飛鏢衫",
+        "fabric_and_product_details": "運動布料",
+        "printing_details": "全套熱昇華",
+        "unit_price": 255,
+        "qty": 6,
+        "deposit_payment": 0,
+        "client_name": "SAMPLE_CLIENT"
+      }
+    ]
+  }
+}
