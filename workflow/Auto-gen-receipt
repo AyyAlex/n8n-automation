@@ -1,0 +1,201 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DOC_ID",
+          "mode": "list",
+          "cachedResultName": "n8n Receipt",
+          "cachedResultUrl": "https://docs.google.com/document/d/YOUR_GOOGLE_DOC_ID/edit"
+        },
+        "name": "={{ $json.phone_number }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "n8n receipt",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [624, 48],
+      "id": "906042f8-bfa7-4832-bbd6-9e5c0e004eb3",
+      "name": "copy quotation1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('copy quotation1').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1072, 48],
+      "id": "f5d36af5-053a-48b0-a72b-be1a39d5bf02",
+      "name": "Download quotation1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            { "action": "replaceAll", "text": "date_date", "replaceText": "={{ $('Merge3').item.json.date_date }}" },
+            { "action": "replaceAll", "text": "client_name", "replaceText": "={{ $('Merge3').item.json.client_name}}" },
+            { "action": "replaceAll", "text": "ddmmyyyy", "replaceText": "={{ $('Merge3').item.json.ddmmyyyy }}" },
+            { "action": "replaceAll", "text": "contact_number", "replaceText": "={{ $('Merge3').item.json.phone_number }}" },
+            { "action": "replaceAll", "text": "product_name", "replaceText": "={{ $('Merge3').item.json.product_name }}" },
+            { "action": "replaceAll", "text": "printing_details", "replaceText": "={{ $('Merge3').item.json.printing_details }}" },
+            { "action": "replaceAll", "text": "unit_price", "replaceText": "={{ $('Merge3').item.json.unit_price }}" },
+            { "action": "replaceAll", "text": "qty", "replaceText": "={{ $('Merge3').item.json.qty }}" },
+            { "action": "replaceAll", "text": "total_amount", "replaceText": "={{ $('Merge3').item.json.total_amount }}" },
+            { "action": "replaceAll", "text": "fabric_and_product_details", "replaceText": "={{ $('Merge3').item.json.fabric_and_product_details }}" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [848, 48],
+      "id": "3c7ae0ab-cd7f-4cb9-a9a3-714d7e20250a",
+      "name": "Google Docs"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [432, 48],
+      "id": "3c0cb62e-14eb-4e2b-be04-4a90570d04aa",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [192, -64],
+      "id": "9c7d01f4-d584-49c8-8568-998146556ac4",
+      "name": "Merge2",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "ddMMyyyy",
+        "outputFieldName": "ddmmyyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-144, 0],
+      "id": "6a1b0473-a00f-4516-ba87-7e015c1c0c60",
+      "name": "Date & Time5"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "outputFieldName": "date_date",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-144, -160],
+      "id": "e9f18557-6d7a-486e-bbce-49e2b589fe80",
+      "name": "Date & Time4"
+    },
+    {
+      "parameters": {
+        "includeTime": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [-384, -80],
+      "id": "bf89147d-9107-4e2a-8c39-14b8600f5756",
+      "name": "Date & Time3"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "phone_number" },
+            { "name": "product_name" },
+            { "name": "fabric_and_product_details" },
+            { "name": "printing_details" },
+            { "name": "unit_price", "type": "number" },
+            { "name": "qty", "type": "number" },
+            { "name": "client_name" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-640, 160],
+      "id": "50b756eb-1a92-4dcd-92f0-aa936b78e222",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "2eb07186-b03c-4a80-afd0-93ad86f38683", "name": "unit_price", "value": "={{ $json.unit_price }}", "type": "string" },
+            { "id": "a1d591c8-d24d-4070-b64f-22fd1dbb10de", "name": "qty", "value": "={{ $json.qty }}", "type": "string" },
+            { "id": "5598162e-c37b-47a3-aaee-91ae911939af", "name": "total_amount", "value": "={{ $json.qty*$json.unit_price }}", "type": "string" }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-144, 160],
+      "id": "e857b008-3c5b-4052-820e-c1e38a40fbcd",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "copy quotation1": { "main": [[{ "node": "Google Docs", "type": "main", "index": 0 }]] },
+    "Download quotation1": { "main": [[]] },
+    "Google Docs": { "main": [[{ "node": "Download quotation1", "type": "main", "index": 0 }]] },
+    "Merge3": { "main": [[{ "node": "copy quotation1", "type": "main", "index": 0 }]] },
+    "Merge2": { "main": [[{ "node": "Merge3", "type": "main", "index": 0 }]] },
+    "Date & Time5": { "main": [[{ "node": "Merge2", "type": "main", "index": 1 }]] },
+    "Date & Time4": { "main": [[{ "node": "Merge2", "type": "main", "index": 0 }]] },
+    "Date & Time3": { "main": [[{ "node": "Date & Time4", "type": "main", "index": 0 }, { "node": "Date & Time5", "type": "main", "index": 0 }]] },
+    "When Executed by Another Workflow": { "main": [[{ "node": "Date & Time3", "type": "main", "index": 0 }, { "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Edit Fields": { "main": [[{ "node": "Merge3", "type": "main", "index": 1 }]] }
+  },
+  "pinData": {}
+}
