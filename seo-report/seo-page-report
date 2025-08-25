@@ -1,0 +1,783 @@
+{
+  "name": "AI Seo Page",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        384
+      ],
+      "id": "95a5f669-9f8e-4706-8dec-b7ec893a6eec",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\n\n// 最近 1 個月（從今天開始）\nconst startOfLast1Month = new Date(now);\nstartOfLast1Month.setMonth(now.getMonth() - 1);\n\nconst endOfLast1Month = new Date(startOfLast1Month);\nendOfLast1Month.setMonth(startOfLast1Month.getMonth() + 1);\nendOfLast1Month.setDate(startOfLast1Month.getDate() - 1);\n\n// 上一個 1 個月\nconst startOfPrevious1Month = new Date(startOfLast1Month);\nstartOfPrevious1Month.setMonth(startOfLast1Month.getMonth() - 1);\n\nconst endOfPrevious1Month = new Date(startOfPrevious1Month);\nendOfPrevious1Month.setMonth(startOfPrevious1Month.getMonth() + 1);\nendOfPrevious1Month.setDate(startOfPrevious1Month.getDate() - 1);\n\n// 3 個月前\nconst startOfThreeMonthsAgo = new Date(now);\nstartOfThreeMonthsAgo.setMonth(now.getMonth() - 3);\n\nconst endOfThreeMonthsAgo = new Date(startOfThreeMonthsAgo);\nendOfThreeMonthsAgo.setMonth(startOfThreeMonthsAgo.getMonth() + 1);\nendOfThreeMonthsAgo.setDate(startOfThreeMonthsAgo.getDate() - 1);\n\n// 6 個月前\nconst startOfSixMonthsAgo = new Date(now);\nstartOfSixMonthsAgo.setMonth(now.getMonth() - 6);\n\nconst endOfSixMonthsAgo = new Date(startOfSixMonthsAgo);\nendOfSixMonthsAgo.setMonth(startOfSixMonthsAgo.getMonth() + 1);\nendOfSixMonthsAgo.setDate(startOfSixMonthsAgo.getDate() - 1);\n\n// 1 年前\nconst startOfLastYear = new Date(now);\nstartOfLastYear.setFullYear(now.getFullYear() - 1);\nstartOfLastYear.setMonth(now.getMonth() - 1);\n\nconst endOfLastYear = new Date(startOfLastYear);\nendOfLastYear.setMonth(startOfLastYear.getMonth() + 1);\nendOfLastYear.setDate(startOfLastYear.getDate() - 1);\n\n// 輸出結果\nreturn [\n  {\n    json: {\n      last1Month: {\n        startDate: startOfLast1Month.toISOString().split('T')[0],\n        endDate: endOfLast1Month.toISOString().split('T')[0],\n      },\n      previous1Month: {\n        startDate: startOfPrevious1Month.toISOString().split('T')[0],\n        endDate: endOfPrevious1Month.toISOString().split('T')[0],\n      },\n      threeMonthsAgo: {\n        startDate: startOfThreeMonthsAgo.toISOString().split('T')[0],\n        endDate: endOfThreeMonthsAgo.toISOString().split('T')[0],\n      },\n      sixMonthsAgo: {\n        startDate: startOfSixMonthsAgo.toISOString().split('T')[0],\n        endDate: endOfSixMonthsAgo.toISOString().split('T')[0],\n      },\n      oneYearAgo: {\n        startDate: startOfLastYear.toISOString().split('T')[0],\n        endDate: endOfLastYear.toISOString().split('T')[0],\n      },\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -624,
+        384
+      ],
+      "id": "490b598b-77ef-4ef6-a17b-97607ae07b95",
+      "name": "Start and End Date"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.heliosgroup.com.hk/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{access_token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $json.threeMonthsAgo.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.threeMonthsAgo.endDate }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "page"
+            },
+            {
+              "name": "rowLimit",
+              "value": "200"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        384
+      ],
+      "id": "61c086ac-13b7-4f67-9e37-fd4d6a5d1340",
+      "name": "Three Month Query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "hi5RsM1OxWXHSY7B",
+          "name": "Google OAuth2 credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.heliosgroup.com.hk/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{access_token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $json.oneYearAgo.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.oneYearAgo.endDate }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "page"
+            },
+            {
+              "name": "rowLimit",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        768
+      ],
+      "id": "6c48449d-9d79-49ad-a37c-31950cdf0833",
+      "name": "one year ago",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "hi5RsM1OxWXHSY7B",
+          "name": "Google OAuth2 credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.heliosgroup.com.hk/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $credentials['Google search console'].access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $json.last1Month.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.last1Month.endDate }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "page"
+            },
+            {
+              "name": "rowLimit",
+              "value": "200"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "0f424b7b-6184-4fb9-aad6-e1552e80c9fd",
+      "name": "Last 1 month Query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "hi5RsM1OxWXHSY7B",
+          "name": "Google OAuth2 credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.heliosgroup.com.hk/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{access_token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $json.previous1Month.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.previous1Month.endDate }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "page"
+            },
+            {
+              "name": "rowLimit",
+              "value": "200"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        192
+      ],
+      "id": "9d7a97c3-ab50-4a67-8266-000bc2d4195a",
+      "name": "Previous 1 month",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "hi5RsM1OxWXHSY7B",
+          "name": "Google OAuth2 credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.heliosgroup.com.hk/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{access_token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $json.sixMonthsAgo.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.sixMonthsAgo.endDate }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "page"
+            },
+            {
+              "name": "rowLimit",
+              "value": "200"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -400,
+        576
+      ],
+      "id": "534a588a-535e-479d-add8-4bb7cd27aaba",
+      "name": "Six Month Query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "hi5RsM1OxWXHSY7B",
+          "name": "Google OAuth2 credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you are going to analyze the following data:\n{{ $json.concatenated_Last_Year_Data }}\n{{ $json.concatenated_Last_1_month_data }}\n{{ $json.concatenated_Three_Month_Query }}\n{{ $json.concatenated_Six_month_ago_1_month_data }}\n{{ $json.concatenated_Previous_1_month_data }}",
+        "options": {
+          "systemMessage": "SEO Performance Analysis Prompt (Focused on Key Improvement Opportunities)\nYou are an expert SEO analyst with extensive experience in analyzing search engine performance, page trends, and data interpretation. Your task is to conduct a comprehensive SEO performance analysis comparing page data from:\n\nLast 1 month\nPrevious 1 month\n3 months ago\n6 months ago\nSame period 1 year ago\nObjective:\nProvide a detailed report focusing on 15 pages that deserve attention, whether due to significant improvement opportunities, performance declines, or emerging trends. The goal is to identify actionable insights for growth and optimization.\n\n1. Executive Summary:\nA concise summary of the key findings from the analysis.\nNotable trends and shifts observed over the different periods.\nIdentify major areas of opportunity and challenges based on data insights.\nHighlight seasonal trends and potential external factors affecting performance.\n2. Page Performance Analysis:\nAnalyze and provide insights for 15 notable keywords, including:\nPage with significant performance fluctuations (either positive or negative).\nEmerging Page that show potential growth.\nPage with consistently low engagement that need attention.\nHighly competitive Page that require strategic adjustments.\nFor each Page, provide analysis on:\n\nImpressions: Growth or decline patterns over different periods and potential causes.\nClicks: Engagement trends; is the Page driving meaningful traffic?\nClick-Through Rate (CTR): Are the changes in CTR indicating relevance issues or optimization needs?\nRanking Position: Any changes in ranking and contributing factors (e.g., competition, algorithm shifts).\nProvide deeper insights into the following categories:\n\nTop Gainers: Page that have seen the most improvement.\nBiggest Decliners: Page with noticeable drops in performance.\nHidden Opportunities: Page with strong potential but underutilized.\nCritical Underperformers: Page with consistent low engagement needing immediate action.\n3. Trend Analysis:\nMonth-over-month and year-over-year keyword trends.\nIdentify seasonal shifts and provide insights on planning for future campaigns.\nHighlight trending topics and how they align with business objectives.\nSuggest content strategies based on observed search patterns.\n4. Competitive Insights:\nAnalyze competition for the selected keywords.\nIdentify competitors outranking the business and their potential advantages.\nRecommend strategies to reclaim or enhance ranking positions.\n5. Landing Page Performance:\nEvaluate how keyword performance aligns with relevant landing pages.\nIdentify high-potential pages and those needing optimization.\nProvide suggestions on content updates, internal linking, and UX improvements.\n6. Regional Analysis:\nCompare traffic performance across key geographic regions.\nIdentify high-performing and underperforming regions for targeted actions.\nProvide recommendations for localized content improvements.\n7. Actionable Recommendations:\nBased on Page analysis, provide actionable recommendations, categorized as:\n\nQuick Wins: Immediate changes that can yield fast improvements.\nMid-term Improvements: Structural SEO and content strategies.\nLong-term Strategy: Planning for sustainable growth through content and technical optimization.\n8. Forecasting & Future Strategy:\nProvide insights into expected trends and how to prepare for them.\nSuggest potential new Page opportunities based on data patterns.\nRecommend adjustments to content and SEO strategies to align with anticipated search behavior.\nData Format Requirements:\nEnsure the report is structured with clear sections, tables, and charts where applicable.\nInclude numerical comparisons, percentage changes, and actionable insights.\nPresent findings in an easy-to-read format for decision-making purposes.\n\n## **Objective:**\nProvide a detailed report analyzing Page performance, trends, and meaningful changes between the two periods. Your analysis should include:\n\n### **1. Executive Summary:**\n- A high-level overview of overall performance changes.\n- Key trends and patterns observed between the two periods.\n- Major wins and areas of concern.\n- Highlight the impact of market conditions, seasonality, or algorithm changes.\n\n### **2. Keyword Analysis:**\nFor each keyword, analyze the following metrics and provide insights:\n- **Impressions:** Has visibility increased or decreased? Identify potential causes (e.g., demand shifts, ranking changes).\n- **Clicks:** Compare click volume; determine if engagement has improved or declined.\n- **Click-Through Rate (CTR):** Evaluate whether the CTR changes indicate stronger or weaker user intent targeting.\n- **Ranking Position:** Identify improvements or drops in rankings and suggest possible reasons (competition, content quality, algorithm changes).\n\n**Provide the top 5 Page that:**\n- Gained the most clicks compared to last year.\n- Lost the most clicks compared to last year.\n- Show the highest CTR improvement.\n- Show the highest CTR decline.\n\n**Recommendations for keyword improvement:**\n- Suggest improvements for underperforming keywords (e.g., title tag optimization, content refresh, better internal linking).\n- Identify new keyword opportunities based on emerging trends.\n\n### **3. Trend Analysis:**\n- Compare keyword trends month-over-month and year-over-year.\n- Identify any seasonality patterns and provide explanations.\n- Detect emerging keywords or search patterns and their implications.\n- Provide actionable recommendations to capitalize on positive trends.\n\n### **4. Competitive Insights:**\n- Compare how keyword rankings align with competitors.\n- Suggest improvements based on competitive gaps and opportunities.\n\n### **5. Landing Page Performance:**\n- Compare the performance of top landing pages between the two periods.\n- Evaluate bounce rates, dwell time, and conversion potential.\n- Provide recommendations for improving poorly performing pages.\n\n### **6. Regional Analysis:**\n- Compare traffic performance from different geographic regions.\n- Highlight opportunities in underperforming regions.\n- Recommend content or campaign localization strategies.\n\n### **7. Actionable Recommendations:**\n- Provide prioritized recommendations for SEO improvements.\n- Separate suggestions into short-term (quick wins) and long-term strategies.\n\n### **8. Forecasting & Future Strategy:**\n- Predict upcoming trends based on data analysis.\n- Recommend adjustments to content strategy, ad targeting, and keyword focus.\n\n---\n\n### **Data Format Requirements:**\nPlease present the report in a structured format with clear sections, using tables where applicable. Ensure the output includes numerical comparisons, percentage changes, and actionable insights.\n\nreply in traditional chinese"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        496,
+        384
+      ],
+      "id": "ca647030-59a2-448b-9e79-698d168293c9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "540a2469-2016-4d35-8be5-d7911f59ab15",
+              "name": "Last 1 month data",
+              "value": "={{ $json.rows }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "c561b4c4-e434-4d5d-941f-346d04b2c657",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d98a58e3-35e5-482d-bef9-3242bbd8af30",
+              "name": "Last Year Data",
+              "value": "={{ $json.rows }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        768
+      ],
+      "id": "e0af6916-329c-4f92-b213-57060db5fa34",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        48,
+        336
+      ],
+      "id": "2545f4cb-6dd7-448c-9e49-c542803baefd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "Last Year Data"
+            },
+            {
+              "aggregation": "concatenate",
+              "field": "Last 1 month data"
+            },
+            {
+              "aggregation": "concatenate",
+              "field": "Three Month Query"
+            },
+            {
+              "aggregation": "concatenate",
+              "field": "Six month ago 1 month data"
+            },
+            {
+              "aggregation": "concatenate",
+              "field": "Previous 1 month data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        272,
+        384
+      ],
+      "id": "3edf45d6-f042-4e47-ba4c-2865c8482130",
+      "name": "Summarize2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d55cd5b-17a5-4ac8-bc50-e7677035aa2f",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        384
+      ],
+      "id": "180ce2a4-dc19-4849-83f9-45841ba7c57b",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "540a2469-2016-4d35-8be5-d7911f59ab15",
+              "name": "Previous 1 month data",
+              "value": "={{ $json.rows }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        192
+      ],
+      "id": "01a53e8d-0c6c-4218-8383-0b743b1239e4",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "540a2469-2016-4d35-8be5-d7911f59ab15",
+              "name": "Three Month Query",
+              "value": "={{ $json.rows }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        384
+      ],
+      "id": "6990b73a-63a3-4760-8832-02e06fc4e67f",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "540a2469-2016-4d35-8be5-d7911f59ab15",
+              "name": "Six month ago 1 month data",
+              "value": "={{ $json.rows }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        576
+      ],
+      "id": "a58543db-6bc7-461d-bafe-696be616bfae",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "device": "6666b35c0509b188132eb552",
+        "phone": "+85295659929",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        384
+      ],
+      "id": "16520ef7-71aa-4d17-90bb-5cf6e0221160",
+      "name": "Send a text message",
+      "credentials": {
+        "apiKey": {
+          "id": "clrhaGElzPM3Nsoj",
+          "name": "Helios Wassenger "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        568,
+        608
+      ],
+      "id": "c7c2a09b-84cc-4241-be6b-d39dd77fc70e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8eodRMHCbnFolZ3e",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Start and End Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start and End Date": {
+      "main": [
+        [
+          {
+            "node": "Last 1 month Query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Previous 1 month",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Three Month Query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Six Month Query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "one year ago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Three Month Query": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "one year ago": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Last 1 month Query": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Previous 1 month": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Six Month Query": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Summarize2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cfb4412a-fd36-45fa-8882-5c995fd62c53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92b121e59a021c348b02da25ddf213c3b4a8310df12651d21b7e00b9a4295c52"
+  },
+  "id": "TUGSEvdMH2Ge0Ahb",
+  "tags": [
+    {
+      "createdAt": "2025-01-22T04:02:47.816Z",
+      "updatedAt": "2025-01-22T04:02:47.816Z",
+      "id": "awIePl8P2goAlZBU",
+      "name": "Helios console"
+    }
+  ]
+}
