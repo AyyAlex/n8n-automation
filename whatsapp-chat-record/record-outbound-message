@@ -1,0 +1,137 @@
+{
+  "name": "WhatsApp record message out",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "68f6ae09-ba89-4e04-ac12-4b637be93762",
+              "name": "body.data.toNumber",
+              "value": "={{ $json.body.data.toNumber }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "83224a1c-a433-4109-8b00-34edfa57d8e6",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [352, 208]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Chat record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Message_In_Out",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=YOUR_SHEET_GID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone number ": "={{ $json.body.data.toNumber }}",
+            "Message Out": "={{ $('Webhook').item.json.body.data.body }}",
+            "Time": "={{ $('Webhook').item.json.body.data.date }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Phone number ",
+              "displayName": "Phone number ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message In",
+              "displayName": "Message In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message Out",
+              "displayName": "Message Out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "76c73eef-70c0-4d2e-a3a7-7f1518c4a148",
+      "name": "Google Sheets3: add number & text",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [576, 208]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "YOUR_WEBHOOK_PATH",
+        "options": {}
+      },
+      "id": "d1b1d6d5-4ee7-481a-9f0f-2d149c567fc0",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [128, 208]
+    },
+    {
+      "parameters": {
+        "tableId": "Chat Record",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Phone_number", "fieldValue": "={{ $json['Phone number '] }}" },
+            { "fieldId": "Message_out", "fieldValue": "={{ $json['Message Out'] }}" },
+            { "fieldId": "Time", "fieldValue": "={{ $json.Time }}" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [800, 208],
+      "id": "f657b651-be17-4c97-9a7f-a8b93b87d3a9",
+      "name": "Create a row"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": { "main": [[{ "node": "Google Sheets3: add number & text", "type": "main", "index": 0 }]] },
+    "Webhook": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Google Sheets3: add number & text": { "main": [[{ "node": "Create a row", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}
