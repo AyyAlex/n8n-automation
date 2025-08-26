@@ -1,21 +1,18 @@
 {
-  "name": "WhatsApp record message out",
+  "name": "WhatsApp record message out (Cleaned)",
   "nodes": [
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "68f6ae09-ba89-4e04-ac12-4b637be93762",
               "name": "body.data.toNumber",
               "value": "={{ $json.body.data.toNumber }}",
               "type": "number"
             }
           ]
-        },
-        "options": {}
+        }
       },
-      "id": "83224a1c-a433-4109-8b00-34edfa57d8e6",
       "name": "Edit Fields",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -45,53 +42,15 @@
             "Message Out": "={{ $('Webhook').item.json.body.data.body }}",
             "Time": "={{ $('Webhook').item.json.body.data.date }}"
           },
-          "matchingColumns": [],
           "schema": [
-            {
-              "id": "Phone number ",
-              "displayName": "Phone number ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Message In",
-              "displayName": "Message In",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Message Out",
-              "displayName": "Message Out",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Time",
-              "displayName": "Time",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+            { "id": "Phone number ", "displayName": "Phone number ", "type": "string" },
+            { "id": "Message In", "displayName": "Message In", "type": "string" },
+            { "id": "Message Out", "displayName": "Message Out", "type": "string" },
+            { "id": "Time", "displayName": "Time", "type": "string" }
+          ]
+        }
       },
-      "id": "76c73eef-70c0-4d2e-a3a7-7f1518c4a148",
-      "name": "Google Sheets3: add number & text",
+      "name": "Google Sheets: add number & text",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [576, 208]
@@ -99,10 +58,8 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "YOUR_WEBHOOK_PATH",
-        "options": {}
+        "path": "YOUR_WEBHOOK_PATH"
       },
-      "id": "d1b1d6d5-4ee7-481a-9f0f-2d149c567fc0",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -122,16 +79,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [800, 208],
-      "id": "f657b651-be17-4c97-9a7f-a8b93b87d3a9",
       "name": "Create a row"
     }
   ],
-  "pinData": {},
   "connections": {
-    "Edit Fields": { "main": [[{ "node": "Google Sheets3: add number & text", "type": "main", "index": 0 }]] },
-    "Webhook": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
-    "Google Sheets3: add number & text": { "main": [[{ "node": "Create a row", "type": "main", "index": 0 }]] }
+    "Edit Fields": { "main": [[{ "node": "Google Sheets: add number & text", "type": "main", "index": 0 }]] },
+    "Google Sheets: add number & text": { "main": [[{ "node": "Create a row", "type": "main", "index": 0 }]] },
+    "Webhook": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] }
   },
+  "pinData": {},
   "active": false,
   "settings": { "executionOrder": "v1" }
 }
