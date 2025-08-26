@@ -1,0 +1,170 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "YOUR_WEBHOOK_PATH",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        688
+      ],
+      "id": "06f75bf5-dd79-4ab2-aa74-ebacdc5f8036",
+      "webhookId": "688b03f6-a5c4-4245-9e80-88850043b2c4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "YOUR_GOOGLE_SHEET_ID",
+        "sheetName": "YOUR_SHEET_GID",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone number": "={{ $json.body.data.fromNumber }}",
+            "Message In": "={{ $json.body.data.body }}",
+            "Message Out": "=",
+            "Time": "={{ $json.body.data.date }}"
+          }
+        },
+        "options": {}
+      },
+      "name": "Google Sheets: add record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        -880,
+        688
+      ],
+      "id": "1282df60-0ce2-4d38-8670-abd068d38baf"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "Phone number",
+              "value": "={{ $json['Phone number'].toString().replace(/^\\+/, '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "name": "Normalize Phone",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        688
+      ],
+      "id": "735ed7e6-5d57-4046-a73b-3c9473e14551"
+    },
+    {
+      "parameters": {
+        "tableId": "Chat Record",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Phone_number",
+              "fieldValue": "={{ $json['Phone number'] }}"
+            },
+            {
+              "fieldId": "Message_in",
+              "fieldValue": "={{ $json['Message In'] }}"
+            },
+            {
+              "fieldId": "Time",
+              "fieldValue": "={{ $json['Time'] }}"
+            }
+          ]
+        }
+      },
+      "name": "Create row (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        688
+      ],
+      "id": "191dde60-1475-48f2-946a-4b53cfe930e6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "body.data.fromNumber",
+              "value": "={{ $json.body.data.fromNumber }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Edit Fields5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        688
+      ],
+      "id": "56922b69-05e7-4a46-8eb6-eb4f4eb19388"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: add record": {
+      "main": [
+        [
+          {
+            "node": "Normalize Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Phone": {
+      "main": [
+        [
+          {
+            "node": "Create row (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: add record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92b121e59a021c348b02da25ddf213c3b4a8310df12651d21b7e00b9a4295c52"
+  }
+}
