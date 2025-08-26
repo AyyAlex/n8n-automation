@@ -1,0 +1,110 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "phone_number"
+            },
+            {
+              "name": "amount_paid"
+            },
+            {
+              "name": "amount_due"
+            },
+            {
+              "name": "delivery"
+            },
+            {
+              "name": "factory_shipping_date"
+            },
+            {
+              "name": "customer_receiving_date"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "name": "When Executed by Another Workflow",
+      "id": "5dda3251-3f6e-4639-9b06-b17f6a1ca7cb"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Chat Record",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Phone_number",
+              "condition": "eq",
+              "keyValue": "={{ $json.phone_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "name": "Get chat record",
+      "id": "c8d96042-5566-4b48-8988-4dc09f84a5b8",
+      "credentials": {
+        "supabaseApi": {
+          "id": "42qaYUDaujMsO0ub",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lines = items.map(i => {\n  const msg = i.json;\n  if (msg.Message_in && msg.Message_in !== \"[null]\") {\n    return `[client] ${msg.Time}：${msg.Message_in}`;\n  } else if (msg.Message_out && msg.Message_out !== \"[null]\") {\n    return `[helios] ${msg.Time}：${msg.Message_out}`;\n  } else {\n    return null;\n  }\n}).filter(Boolean);\n\nreturn [{ json: { context: lines.join('\\n') } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "name": "Build context text",
+      "id": "f09a91cf-6936-4f2d-b64a-71d91c14faf0"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get chat record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get chat record": {
+      "main": [
+        [
+          {
+            "node": "Build context text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92b121e59a021c348b02da25ddf213c3b4a8310df12651d21b7e00b9a4295c52"
+  }
+}
