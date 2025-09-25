@@ -1,0 +1,473 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [208, -32],
+      "id": "57a5debf-27ef-4d73-8e5d-13ce164a2073",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_SHEETS_DOC_ID>",
+          "mode": "list",
+          "cachedResultName": "<SPREADSHEET_NAME>",
+          "cachedResultUrl": "<REDACTED_URL>"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "<SHEET_GID_OR_NAME>",
+          "mode": "list",
+          "cachedResultName": "<SHEET_TAB_NAME>",
+          "cachedResultUrl": "<REDACTED_URL>"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "進度",
+              "lookupValue": "貨到"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [432, -32],
+      "id": "6bdd97eb-1165-4884-9a4e-41a8ce3d80fc",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "28540262-91ab-4c85-b835-78bf9d874790",
+              "leftValue": "={{ $json['進度'] }}",
+              "rightValue": "貨到",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [656, -32],
+      "id": "b2500e44-a546-48e2-a6c1-ddd0bf457ad6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e3e93d36-de7d-4668-b455-f8bb3c1504fa",
+              "name": "phone_number",
+              "value": "={{ $json['Client\\'sName'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [880, -32],
+      "id": "edf8ff5f-66d6-4d4b-8cfd-4b96e0c51f4d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['送貨'] }}",
+                    "rightValue": "包送貨",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1dd2911a-1d29-4217-8c5f-315a3fbdbc18"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9b99b843-9239-441d-a90a-6de689051bbe",
+                    "leftValue": "={{ $json['送貨'] }}",
+                    "rightValue": "唔包送貨",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [1104, -32],
+      "id": "36c977c9-c8ac-4c41-9720-50afbc08a152",
+      "name": "delivery or pick up"
+    },
+    {
+      "parameters": {
+        "device": "<WASSENGER_DEVICE_ID>",
+        "phone": "={{ $('Edit Fields').item.json.phone_number }}",
+        "message": "=Hello 貨到左\n\n可以比底以下既資料我地安排送貨： \n\n可送貨時間：\n營業時間\n紅日放假\n星期一至星期五\n上午9：00-下午5:00\n\n日期：\n時間段：\n地址（詳細） ：\n電話：\n姓名：\n*請盡量使用中文",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [1328, -128],
+      "id": "83a6c1d1-9f7b-4280-b80c-9b546299ff50",
+      "name": "Delivery"
+    },
+    {
+      "parameters": {
+        "device": "<WASSENGER_DEVICE_ID>",
+        "phone": "={{ $json.phone_number }}",
+        "message": "Hello 貨到左，\n可以辦公時間去我地office取貨\n\n<YOUR_OFFICE_ADDRESS>\n營業時間\n紅日放假\n星期一至星期五 中午1-2pm為午飯時間\n9:00-13:00  14:00-18:00 (最後預約時間為5pm)\n\nMonday To Friday 1-2pm lunch hour\n9:00-13:00  14:00-18:00(last appointment 5pm)",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [1328, 64],
+      "id": "4dd7763d-bf2c-472f-ba4c-1912da44b50e",
+      "name": "Pick up"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_SHEETS_DOC_ID>",
+          "mode": "list",
+          "cachedResultName": "<SPREADSHEET_NAME>",
+          "cachedResultUrl": "<REDACTED_URL>"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "<SHEET_GID_OR_NAME>",
+          "mode": "list",
+          "cachedResultName": "<SHEET_TAB_NAME>",
+          "cachedResultUrl": "<REDACTED_URL>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "進度": "已通知客戶",
+            "Client'sName": "={{ $('Edit Fields').item.json.phone_number }}"
+          },
+          "matchingColumns": ["Client'sName"],
+          "schema": [
+            {
+              "id": "Client'sName",
+              "displayName": "Client'sName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "負責人",
+              "displayName": "負責人",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "進度",
+              "displayName": "進度",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "送貨",
+              "displayName": "送貨",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "收貨日期",
+              "displayName": "收貨日期",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "工廠",
+              "displayName": "工廠",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "單號",
+              "displayName": "單號",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "落單日期",
+              "displayName": "落單日期",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "款式",
+              "displayName": "款式",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "總數量",
+              "displayName": "總數量",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "總金額",
+              "displayName": "總金額",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "每件價錢",
+              "displayName": "每件價錢",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "效果圖",
+              "displayName": "效果圖",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "收據單",
+              "displayName": "收據單",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "收款",
+              "displayName": "收款",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "收款備註",
+              "displayName": "收款備註",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1552, -32],
+      "id": "ca522c56-3aec-4e17-9888-2ce5e70c2423",
+      "name": "Update row in sheet"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "delivery or pick up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delivery or pick up": {
+      "main": [
+        [
+          {
+            "node": "Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pick up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick up": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
